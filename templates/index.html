@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Flask Application using Docker</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mt-5">Search Engine Ranking Tool</h1>
+        <form id="inputForm">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="inputQuery">Search term</label>
+                    <input type="text" class="form-control mt-1" id="inputQuery" placeholder="e. g. geeksforgeeks">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="inputTargetUrl">Target url</label>
+                    <input type="url" class="form-control mt-1" id="inputTargetUrl"
+                        placeholder="e. g. https://example.com">
+                </div>
+            </div>
+            <div class="button-box">
+                <button id="submitForm" type="submit" class="btn btn-primary mt-4">Submit</button>
+                <button id="emptyResults" class="btn btn-primary mt-4">Reset</button>
+            </div>
+        </form>
+
+        <div class="mt-5" id="results-container">
+
+        </div>
+    </div>
+
+
+    <!-- Bootstrap core JS -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src={{ url_for('static', filename='js/bootstrap.min.js' ) }}></script>
+
+    <script type="text/javascript">
+
+        $('#emptyResults').click((event) => {
+            event.preventDefault();
+
+            $('#results-container').empty()
+        })
+
+        $('#submitForm').click((event) => {
+            event.preventDefault();
+
+            const query = $('#inputQuery').val()
+            const targetUrl = $('#inputTargetUrl').val()
+
+            // Google
+            fetch('/google?query=' + query + '&targetUrl=' + targetUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    $('#results-container').prepend(`
+                        <div class= "card mt-3" >
+                            <h5 class="card-header">
+                                <img style="width: 20px;" src="/static/images/google.png" />
+                                Google-Suchergebniss
+                            </h5>
+                            <div class="card-body">
+                                <h5 class="card-title">${data['ranking'] == -1 ? 'Nicht gelistet' : data['ranking'] + '. Platz'}</h5>
+                                <p class="card-text"><a href="#" class="link-primary">${targetUrl}</a></p>
+                            </div>
+                        </div >
+                    `)
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+
+            // DuckDuckGo
+            fetch('/duckduckgo?query=' + query + '&targetUrl=' + targetUrl, {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    $('#results-container').prepend(`
+                        <div class= "card mt-3" >
+                            <h5 class="card-header">
+                                <img style="width: 20px;" src="/static/images/duckduckgo.png" />
+                                DuckDuckGo-Suchergebniss
+                            </h5>
+                            <div class="card-body">
+                                <h5 class="card-title">${data['ranking'] == -1 ? 'Nicht gelistet' : data['ranking'] + '. Platz'}</h5>
+                                <p class="card-text"><a href="#" class="link-primary">${targetUrl}</a></p>
+                            </div>
+                        </div >
+                    `)
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        })
+
+    </script>
+</body>
+
+</html>
