@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from googlesearch import search
 from urllib.parse import urlparse
 from duckduckgo_search import ddg
+from ScrapeSearchEngine.SearchEngine import Yahoo
 import json
 
 app = Flask(__name__)
@@ -44,6 +45,33 @@ def duckduckgo():
 
     results = ddg(query,
                   safesearch='Moderate', time='y', max_results=25)
+
+    apiResults = []
+
+    ranking = -1
+    for index, res in enumerate(results):
+        apiResults.append(res['href'])
+        url = urlparse(res['href']).netloc
+        if url == targetUrl and (index+1 < ranking or ranking == -1):
+            ranking = index+1
+
+    return jsonify({'ranking': ranking,
+                    'results': apiResults})
+
+
+@app.route('/yahoo', methods=['POST'])
+def yahoo():
+    query = request.args.get('query')
+    targetUrl = request.args.get('targetUrl')
+
+    targetUrl = urlparse(targetUrl).netloc
+
+    yahooText, yahooLink = Yahoo('dia-mat.de', 'my user agent')
+
+    print('yahooText', yahooText)
+    print('yahooLink', yahooLink)
+
+    return 200
 
     apiResults = []
 
