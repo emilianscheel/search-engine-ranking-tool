@@ -5,7 +5,10 @@
 docker build -t sert-image .
 
 # run container
-docker run -d --name sert-container -p 1151:5000 sert-image
+docker run -d \
+      --name sert-container \
+      --restart=always \
+      -p 1151:5000 search-engine-ranking-tool
 ```
 
 ### nginx
